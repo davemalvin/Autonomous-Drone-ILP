@@ -73,7 +73,7 @@ public class App
     /**
      * Main function that reads the input file argument, calls the methods to obtain 
      * the drone confinement area and the RGB string of each prediction in the
-     * input file, and generates the output heatmap.geojson file
+     * input file, and generates the output heatmap.geojson file.
      * 
      * @param args
      * @throws IOException
