@@ -15,11 +15,16 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>3.8.1</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.mapbox.mapboxsdk</groupId>
+    <artifactId>mapbox-sdk-geojson</artifactId>
+    <version>5.5.0</version>
+  </dependency>
+</dependencies>
 </project>
