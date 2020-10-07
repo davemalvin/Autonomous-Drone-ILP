@@ -6,26 +6,21 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 import com.mapbox.geojson.*;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
     /**
      * Writes the input string parameter to the specified input file.
      * 
-     * @param fileName - name of the file to be written to
+     * @param fname - name of the file to be written to
      * @param s - String object to be written to the file
      * @throws IOException
      */
-    private static void writeToFile(String fileName, String s) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+    private static void writeToFile(String fname, String s) throws IOException {
+        var writer = new BufferedWriter(new FileWriter(fname));
         writer.write(s);
         writer.close();
     }
@@ -38,7 +33,7 @@ public class App
      * @return String object
      */
     public static String getRGBString (int x) {
-        String rgbString = "";
+        var rgbString = "";
         if (x >= 0 && x < 32) rgbString = "#00ff00";
         else if (x >= 32 && x < 64) rgbString = "#40ff00";
         else if (x >=64 && x < 96) rgbString = "#80ff00";
@@ -60,13 +55,13 @@ public class App
      * @return Feature object
      */
     public static Feature droneConfinementArea (double lng1, double lng2, double lat1, double lat2) {
-        Point forrestHill = Point.fromLngLat(lng1, lat1);
-        Point meadows = Point.fromLngLat(lng1, lat2);
-        Point kfc = Point.fromLngLat(lng2, lat1);
-        Point buccleuch = Point.fromLngLat(lng2, lat2);
+        var forrestHill = Point.fromLngLat(lng1, lat1);
+        var meadows = Point.fromLngLat(lng1, lat2);
+        var kfc = Point.fromLngLat(lng2, lat1);
+        var buccleuch = Point.fromLngLat(lng2, lat2);
         
-        List<Point> coords = Arrays.asList(forrestHill, meadows, buccleuch, kfc, forrestHill);
-        LineString border = LineString.fromLngLats(coords);
+        var coords = Arrays.asList(forrestHill, meadows, buccleuch, kfc, forrestHill);
+        var border = LineString.fromLngLats(coords);
         return Feature.fromGeometry(border);
     }
     
@@ -81,33 +76,33 @@ public class App
     public static void main( String[] args) throws IOException
     {
         // Open predictions.txt file
-        Scanner scan = new Scanner(new File(args[0]));
+        var scan = new Scanner(new File(args[0]));
         
         // Initialise a list of features 
-        List<Feature> features = new ArrayList<>();
+        var features = new ArrayList<Feature>();
        
         // Longitudes and latitudes of the drone confinement area
-        double lng1 = -3.192473;
-        double lng2 = -3.184319;
-        double lat1 = 55.946233;
-        double lat2 = 55.942617;
+        var lng1 = -3.192473;
+        var lng2 = -3.184319;
+        var lat1 = 55.946233;
+        var lat2 = 55.942617;
         
         // Add feature to list of features for the drone confinement area
         Feature border = droneConfinementArea(lng1, lng2, lat1, lat2);
         features.add(border);
         
         // The dimension of one polygon/rectangle
-        double diffLng = (lng2 - lng1) / 10.0;
-        double diffLat = (lat1 - lat2) / 10.0;
+        var diffLng = (lng2 - lng1) / 10.0;
+        var diffLat = (lat1 - lat2) / 10.0;
         
         // Get a copy of the original value of lng1
-        double copylng1 = lng1;
+        var copylng1 = lng1;
         
         // Read each line of input file until EOF
         while (scan.hasNextLine()) {
             // Get the current line of predictions and split them accordingly to a list of Strings
             String currLine = scan.nextLine();
-            String[] predictions = currLine.split(", ");
+            String[] predictions = currLine.split(",");
             
             // Check if there are exactly 10 predictions in the current line
             if (predictions.length != 10) {
@@ -117,25 +112,26 @@ public class App
             
             // Go through each prediction from left to right
             for (int i = 0; i < 10; i++) {
-                int currVal = Integer.parseInt(predictions[i]);
+                // .strip() is used to remove any whitespace in the prediction value
+                var currVal = Integer.parseInt(predictions[i].strip());
                 
                 // Check if current prediction is valid
-                if (currVal < 0 || currVal >= 256) {
+                if (currVal < 0 || currVal > 255) {
                     System.out.println("Invalid prediction: should only be between 0 and 255 inclusive!");
                     System.exit(0);
                 }
                 
                 // Create a Feature object from the Polygon made with the Points
-                Point pt1 = Point.fromLngLat(lng1, lat1);
-                Point pt2 = Point.fromLngLat(lng1 + diffLng, lat1);
-                Point pt3 = Point.fromLngLat(lng1 + diffLng, lat1 - diffLat);
-                Point pt4 = Point.fromLngLat(lng1, lat1 - diffLat);              
-                List<List<Point>> rectangle = Arrays.asList(Arrays.asList(pt1, pt2, pt3, pt4, pt1));
-                Polygon p = Polygon.fromLngLats(rectangle);
-                Feature f = Feature.fromGeometry(p);
+                var pt1 = Point.fromLngLat(lng1, lat1);
+                var pt2 = Point.fromLngLat(lng1 + diffLng, lat1);
+                var pt3 = Point.fromLngLat(lng1 + diffLng, lat1 - diffLat);
+                var pt4 = Point.fromLngLat(lng1, lat1 - diffLat);              
+                var rectangle = Arrays.asList(Arrays.asList(pt1, pt2, pt3, pt4, pt1));
+                var p = Polygon.fromLngLats(rectangle);
+                var f = Feature.fromGeometry(p);
                 
                 // Obtain the RGB string for the current prediction
-                String rgbString = getRGBString(currVal);
+                var rgbString = getRGBString(currVal);
                 
                 // Add required properties to the Feature object and add it to list of features
                 f.addStringProperty("fill", rgbString);
@@ -151,61 +147,11 @@ public class App
             lat1 -= diffLat;
         }
         scan.close();
-        
-//        String currLine = scan.nextLine();
-//        String[] predictions = currLine.split(", ");
-//        System.out.println(predictions);
-//        for (int i = 1; i <= 10; i++) {
-//            int currVal = Integer.parseInt(predictions[i-1]);
-//            System.out.println(currVal);
-//            String rgbString = getRGBString(currVal);
-//            System.out.println(rgbString);
-//          
-//            Point pt1 = Point.fromLngLat(lng1, lat1);
-//            Point pt2 = Point.fromLngLat(lng1 + diffLng, lat1);
-//            Point pt3 = Point.fromLngLat(lng1 + diffLng, lat1 - diffLat);
-//            Point pt4 = Point.fromLngLat(lng1, lat1 - diffLat);
-//            
-//            List<List<Point>> polygon = Arrays.asList(Arrays.asList(pt1, pt2, pt3, pt4, pt1));
-//            Polygon p = Polygon.fromLngLats(polygon);
-//            Feature f = Feature.fromGeometry(p);
-//            f.addStringProperty("fill", rgbString);
-//            f.addStringProperty("rgb-string", rgbString);
-//            f.addNumberProperty("fill-opacity", 0.75);
-//            features.add(f);
-//            lng1 = lng1 + diffLng;
-//        }
-        
-        
-        // Create polygons
-//        while (scan.hasNextLine()) {
-//            int lineNo = 1;
-//            String currLine = scan.nextLine();
-//            String[] predictions = currLine.split(", ");
-//            
-//            for (int i = 1; i <= 10; i++) {
-//                int currVal = Integer.parseInt(predictions[i-1]);
-//                String rgbString = getRGBString(currVal);
-//              
-//                Point pt1 = Point.fromLngLat(lng1, lat1);
-//                Point pt2 = Point.fromLngLat((lng1 + diffLng) * (double) i, lat1);
-//                Point pt3 = Point.fromLngLat((lng1 + diffLng) * (double) i, lat1 - diffLat);
-//                Point pt4 = Point.fromLngLat(lng1, lat1 - diffLat);
-//                
-//                List<List<Point>> polygon = Arrays.asList(Arrays.asList(pt1, pt2, pt3, pt4, pt1));
-//                Polygon p = Polygon.fromLngLats(polygon);
-//                Feature f = Feature.fromGeometry(p);
-//                f.addStringProperty("fill", rgbString);
-//                f.addStringProperty("rgb-string", rgbString);
-//                f.addNumberProperty("fill-opacity", 0.75);
-//                features.add(f);
-//            }
-//            
-//            lat1 = lat1 - diffLat;
-//            lineNo++;
-//        }
-        FeatureCollection fc = FeatureCollection.fromFeatures(features);
+        // Create a FeatureCollection object from the list of features
+        var fc = FeatureCollection.fromFeatures(features);
+        // Create a JSON-formatted string of the feature collection
         String json = fc.toJson();
+        // Create output file 
         writeToFile("heatmap.geojson", json);
     }
 }
